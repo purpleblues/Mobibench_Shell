@@ -1,0 +1,8 @@
+mobibench
+result
+*.db*
+*.o
+.DS_Store
+sqlite3.h
+sqlite3.c
+.gdb*

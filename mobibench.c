@@ -1328,7 +1328,7 @@ int thread_main_db(void* arg)
     
     if(db_count>1){
         for(i = 2 ; i <= db_count ; i ++){
-            sprintf(sql, "ATTACH 'test%d.db%d' AS aux%d",i,thread_num,i);
+            sprintf(sql, "ATTACH '%s/test%d.db%d' AS aux%d",pathname,i,thread_num,i);
             exec_sql(db,sql,NULL);
         }
     }
