@@ -882,7 +882,7 @@ int thread_main(void* arg)
 	else
 	{
 		sprintf(filename, "%s/test.dat%d", pathname, thread_num);
-		//printf("open file : %s\n", filename);
+		printf("open file : %s\n", filename);
 	}
 
 	init_by_array64(init, length);
@@ -1233,7 +1233,8 @@ int sql_cb(void* data, int ncols, char** values, char** headers)
 	return 0;
 }
 
-#define exec_sql(db, sql, cb)	sqlite3_exec(db, sql, cb, NULL, NULL);
+#define exec_sql(db, sql, cb)	sqlite3_exec(db, sql, cb, NULL, NULL); 
+//puts(sql);
 
 int init_db_for_update(sqlite3* db, char* filename, int trs, int db_index, int db_count)
 {
@@ -1312,7 +1313,7 @@ int thread_main_db(void* arg)
 //	printf("db thread start\n");
 
 	sprintf(filename, "%s/test.db%d", pathname, thread_num);
-//	printf("open db : %s\n", filename);
+	// printf("open db : %s\n", filename);
 
 	rc = sqlite3_open(filename, &db);
 
@@ -1366,8 +1367,9 @@ int thread_main_db(void* arg)
         
         sprintf(temp,"aux%d.",i);
         
-        sprintf(sql, "CREATE TABLE IF NOT EXISTS %stblMyList%d (id INTEGE PRIMARY KEY autoincrement, Value TEXT not null, creation_dat long);", (i>1)?temp:"",i);
+        sprintf(sql, "CREATE TABLE IF NOT EXISTS %stblMyList%d (id INTEGER PRIMARY KEY autoincrement, Value TEXT not null, creation_dat long);", (i>1)?temp:"",i);
         
+
         exec_sql(db,sql,NULL);
     }
     
@@ -1410,12 +1412,13 @@ int thread_main_db(void* arg)
 		get_con_switches();		
 	}
     
-    if(db_count > 1){
-        exec_sql(db, "BEGIN", NULL);
-    }
+
 
     for(i = 0; i < db_transactions; i++) 
     {
+        if(db_count > 1){
+            exec_sql(db, "BEGIN", NULL);
+        }
         for(j = 1 ; j <= db_count ; j ++){
             if(db_mode == 0)
             {
@@ -1449,11 +1452,13 @@ int thread_main_db(void* arg)
             show_progress(((i/db_transactions)*100) / (j / (float)db_count));
             // show_progress(i*100/db_transactions);
         }
+        
+        if(db_count > 1){
+            exec_sql(db, "COMMIT", NULL);
+        }
 	}
     
-    if(db_count > 1){
-        exec_sql(db, "COMMIT", NULL);
-    }
+
 
 	/* Forced checkpointing for WAL mode */
 	if(db_journal_mode == 3)
@@ -2442,6 +2447,7 @@ int main( int argc, char **argv)
 		printf("Transactions per thread: %d\n", db_transactions);
 	}
 	printf("# of Threads : %d\n", num_threads);
+    printf("# of Databases : %d\n",db_count);
  
 	/* Creating threads */
 	for(i = 0; i < num_threads; i++)
